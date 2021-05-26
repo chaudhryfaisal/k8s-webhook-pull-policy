@@ -4,7 +4,8 @@ RUN apk --no-cache add \
     g++ \
     git \
     make \
-    bash
+    bash \
+    upx
 
 ARG VERSION
 ENV VERSION=${VERSION}
@@ -12,6 +13,7 @@ ENV VERSION=${VERSION}
 WORKDIR /src
 COPY . .
 RUN ./scripts/build/build.sh
+RUN upx /src/bin/k8s-webhook-pull-policy
 
 # Final image.
 FROM alpine:latest
