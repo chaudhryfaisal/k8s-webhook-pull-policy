@@ -1,3 +1,4 @@
+
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
@@ -6,7 +7,13 @@ metadata:
     app: k8s-webhook-pull-policy-webhook
     kind: mutator
 webhooks:
-  - name: image-pull-policy-webhook
+  - name: k8s-webhook-pull-policy.fict.dev
+    # Avoid chicken-egg problem with our webhook deployment.
+    objectSelector:
+      matchExpressions:
+        - key: app
+          operator: NotIn
+          values: [ k8s-webhook-pull-policy ]
     admissionReviewVersions: ["v1"]
     sideEffects: None
     clientConfig:

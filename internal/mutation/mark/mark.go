@@ -2,6 +2,7 @@ package mark
 
 import (
 	"context"
+	"github.com/chaudhryfaisal/k8s-webhook-pull-policy/internal/log"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -12,7 +13,7 @@ type Marker interface {
 }
 
 // NewLabelMarker returns a new marker that will mark with labels.
-func NewLabelMarker(pullPolicy string) Marker {
+func NewLabelMarker(pullPolicy string, logger log.Logger) Marker {
 	policy := v1.PullIfNotPresent
 	switch pullPolicy {
 	case string(v1.PullAlways):
@@ -20,18 +21,22 @@ func NewLabelMarker(pullPolicy string) Marker {
 	case string(v1.PullNever):
 		policy = v1.PullNever
 	}
-	return labelmarker{PullPolicy: policy}
+	return labelmarker{PullPolicy: policy, logger: logger}
 }
 
 type labelmarker struct {
 	PullPolicy v1.PullPolicy
+	logger     log.Logger
 }
 
 func (l labelmarker) Mark(_ context.Context, obj metav1.Object) error {
 	pod, ok := obj.(*v1.Pod)
 	if ok {
 		for i := 0; i < len(pod.Spec.Containers); i++ {
-			pod.Spec.Containers[i].ImagePullPolicy = l.PullPolicy
+			if pod.Spec.Containers[i].ImagePullPolicy != l.PullPolicy {
+				l.logger.Debugf("Updated ImagePullPolicy for pod=%s container=%s from=%s to%s", pod.Name, pod.Spec.Containers[i].Name, pod.Spec.Containers[i].ImagePullPolicy, l.PullPolicy)
+				pod.Spec.Containers[i].ImagePullPolicy = l.PullPolicy
+			}
 		}
 	}
 	return nil

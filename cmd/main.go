@@ -7,6 +7,7 @@ import (
 	"net/http/pprof"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -48,7 +49,7 @@ func RunApp() error {
 
 	var marker mark.Marker
 	if len(cfg.ImagePullPolicy) > 0 {
-		marker = mark.NewLabelMarker(cfg.ImagePullPolicy)
+		marker = mark.NewLabelMarker(cfg.ImagePullPolicy, logger)
 		logger.Infof("ImagePullPolicy webhook enabled ImagePullPolicy=%s", cfg.ImagePullPolicy)
 	} else {
 		marker = mark.DummyMarker
@@ -125,9 +126,9 @@ func RunApp() error {
 
 		// Webhook handler.
 		wh, err := webhook.New(webhook.Config{
-			Marker:                     marker,
-			MetricsRecorder:            metricsRec,
-			Logger:                     logger,
+			Marker:          marker,
+			MetricsRecorder: metricsRec,
+			Logger:          logger,
 		})
 		if err != nil {
 			return fmt.Errorf("could not create webhooks handler: %w", err)
@@ -135,7 +136,7 @@ func RunApp() error {
 
 		mux := http.NewServeMux()
 		mux.Handle("/", wh)
-		server := http.Server{Addr: cfg.WebhookListenAddr, Handler: mux}
+		server := http.Server{Addr: cfg.WebhookListenAddr, Handler: Logger(logger, mux)}
 
 		g.Add(
 			func() error {
@@ -169,4 +170,48 @@ func RunApp() error {
 	}
 
 	return nil
+}
+
+// Logs incoming requests, including response status.
+func Logger(logger log.Logger, h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		o := &responseObserver{ResponseWriter: w}
+		h.ServeHTTP(o, r)
+		addr := r.RemoteAddr
+		if i := strings.LastIndex(addr, ":"); i != -1 {
+			addr = addr[:i]
+		}
+		logger.Debugf("%s - - %s %d %d %s %s",
+			addr,
+			fmt.Sprintf("%s %s %s", r.Method, r.URL, r.Proto),
+			o.status,
+			o.written,
+			r.Referer(),
+			r.UserAgent())
+	})
+}
+
+type responseObserver struct {
+	http.ResponseWriter
+	status      int
+	written     int64
+	wroteHeader bool
+}
+
+func (o *responseObserver) Write(p []byte) (n int, err error) {
+	if !o.wroteHeader {
+		o.WriteHeader(http.StatusOK)
+	}
+	n, err = o.ResponseWriter.Write(p)
+	o.written += int64(n)
+	return
+}
+
+func (o *responseObserver) WriteHeader(code int) {
+	o.ResponseWriter.WriteHeader(code)
+	if o.wroteHeader {
+		return
+	}
+	o.wroteHeader = true
+	o.status = code
 }

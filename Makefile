@@ -74,3 +74,12 @@ ci-integration: ## Runs integraton test in CI environment (without docker).
 .PHONY: gen-deploy-certs
 gen-deploy-certs: ## Generate deploy files webhook certificates.
 	@$(GEN_CERTS_CMD)
+.PHONY: deploy
+deploy:
+	kubectl apply -f deploy
+deploy-nginx:
+	kubectl create deployment nginx --image=nginx:alpine
+remove:
+	kubectl delete -f deploy
+remove-nginx:
+	kubectl delete deployment nginx

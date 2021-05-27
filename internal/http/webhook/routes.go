@@ -10,7 +10,7 @@ func (h handler) routes(router *http.ServeMux) error {
 	if err != nil {
 		return err
 	}
-	router.Handle("/wh/mutating/allmark", allmark)
+	router.Handle("/wh/mutating/mark", allmark)
 
 	return nil
 }

@@ -2,6 +2,7 @@ package mark_test
 
 import (
 	"context"
+	"github.com/chaudhryfaisal/k8s-webhook-pull-policy/internal/log"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -55,7 +56,7 @@ func TestLabelMarkerMark(t *testing.T) {
 			assert := assert.New(t)
 			require := require.New(t)
 
-			m := mark.NewLabelMarker(test.marks)
+			m := mark.NewLabelMarker(test.marks, log.Dummy)
 
 			err := m.Mark(context.TODO(), test.obj)
 			require.NoError(err)
