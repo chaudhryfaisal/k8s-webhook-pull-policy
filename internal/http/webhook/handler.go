@@ -30,8 +30,8 @@ func (l kubewebhookLogger) SetValuesOnCtx(parent context.Context, values map[str
 	return kwhlog.CtxWithValues(parent, values)
 }
 
-// allmark sets up the webhook handler for marking all kubernetes resources using Kubewebhook library.
-func (h handler) allMark() (http.Handler, error) {
+// mark sets up the webhook handler for marking all kubernetes resources using Kubewebhook library.
+func (h handler) mark() (http.Handler, error) {
 	mt := kwhmutating.MutatorFunc(func(ctx context.Context, ar *kwhmodel.AdmissionReview, obj metav1.Object) (*kwhmutating.MutatorResult, error) {
 		err := h.marker.Mark(ctx, obj)
 		if err != nil {
@@ -44,9 +44,9 @@ func (h handler) allMark() (http.Handler, error) {
 		}, nil
 	})
 
-	logger := kubewebhookLogger{Logger: h.logger.WithKV(log.KV{"lib": "kubewebhook", "webhook": "allMark"})}
+	logger := kubewebhookLogger{Logger: h.logger.WithKV(log.KV{"lib": "kubewebhook", "webhook": "mark"})}
 	wh, err := kwhmutating.NewWebhook(kwhmutating.WebhookConfig{
-		ID:      "allMark",
+		ID:      "mark",
 		Logger:  logger,
 		Mutator: mt,
 	})

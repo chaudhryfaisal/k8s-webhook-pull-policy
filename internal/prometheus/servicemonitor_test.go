@@ -2,7 +2,7 @@ package prometheus_test
 
 import (
 	"context"
-	"github.com/chaudhryfaisal/k8s-webhook-pull-policy/internal/mutation/prometheus"
+	"github.com/chaudhryfaisal/k8s-webhook-pull-policy/internal/prometheus"
 	"testing"
 	"time"
 

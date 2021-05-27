@@ -6,11 +6,11 @@ import (
 
 // routes wires the routes to handlers on a specific router.
 func (h handler) routes(router *http.ServeMux) error {
-	allmark, err := h.allMark()
+	mark, err := h.mark()
 	if err != nil {
 		return err
 	}
-	router.Handle("/wh/mutating/mark", allmark)
+	router.Handle("/wh/mutating/mark", mark)
 
 	return nil
 }

@@ -34,7 +34,7 @@ func (l labelmarker) Mark(_ context.Context, obj metav1.Object) error {
 	if ok {
 		for i := 0; i < len(pod.Spec.Containers); i++ {
 			if pod.Spec.Containers[i].ImagePullPolicy != l.PullPolicy {
-				l.logger.Debugf("Updated ImagePullPolicy for pod=%s container=%s from=%s to%s", pod.Name, pod.Spec.Containers[i].Name, pod.Spec.Containers[i].ImagePullPolicy, l.PullPolicy)
+				l.logger.Infof("Updated ImagePullPolicy for pod=%s container=%s from=%s to=%s", pod.Name, pod.Spec.Containers[i].Name, pod.Spec.Containers[i].ImagePullPolicy, l.PullPolicy)
 				pod.Spec.Containers[i].ImagePullPolicy = l.PullPolicy
 			}
 		}

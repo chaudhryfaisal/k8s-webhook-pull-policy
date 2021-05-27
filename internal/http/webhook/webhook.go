@@ -2,7 +2,7 @@ package webhook
 
 import (
 	"fmt"
-	"github.com/chaudhryfaisal/k8s-webhook-pull-policy/internal/mutation/prometheus"
+	"github.com/chaudhryfaisal/k8s-webhook-pull-policy/internal/prometheus"
 	"net/http"
 
 	"github.com/chaudhryfaisal/k8s-webhook-pull-policy/internal/log"

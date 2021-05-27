@@ -17,10 +17,9 @@ spec:
     spec:
       containers:
         - name: k8s-webhook-pull-policy
-          image: chaudhryfaisal/k8s-webhook-pull-policy:d46d40f
-          imagePullPolicy: IfNotPresent
+          image: chaudhryfaisal/k8s-webhook-pull-policy:dfeee2f
+          imagePullPolicy: Always
           args:
-            - --debug
             - --tls-cert-file-path=/etc/webhook/certs/cert.pem
             - --tls-key-file-path=/etc/webhook/certs/key.pem
             - --webhook-image-pull-policy=IfNotPresent
